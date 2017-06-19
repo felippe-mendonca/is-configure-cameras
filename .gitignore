@@ -3,3 +3,4 @@ set-parameters
 get-parameters
 set-from-file
 slider-configure
+*.yaml
