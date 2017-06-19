@@ -1,0 +1,58 @@
+#!/bin/bash
+
+__USER=$USER
+
+# Get super user privileges
+if [[ $EUID != 0 ]]; then
+    sudo "$0" "$@"
+    exit $?
+fi
+
+this_path=$PWD
+install_path=/tmp/is_install/
+mkdir -p $install_path && cd $install_path
+
+function import::git {
+	if [ ! -d $(basename $1) ]; then
+		git clone $1
+	fi
+	echo -n $(basename $1)
+}
+
+function install::cmake {
+	read path
+	cd $path
+	mkdir -p build
+	cd build
+	cmake -DCMAKE_INSTALL::LIBDIR=lib .. 
+	make install -j `nproc`
+	cd $install_path
+}
+
+function find::folder {
+	if [ ! -d $1 ]; then
+		echo " [x] $(basename $1) not found..."
+		return 1
+	fi
+	echo " [x] $(basename $1) found..."
+	return 0
+}
+
+function install::is_tracing {
+    read path
+	cd $path
+    git checkout tracing
+    cd scripts
+    ./install
+    cd $install_path
+}
+
+import::git https://github.com/labviros/is-cpp | install::is_tracing
+
+if ! find::folder /usr/local/nana; then
+    import::git https://github.com/felippe-mendonca/nana | install::cmake
+fi
+
+if ! find::folder /usr/local/yaml-cpp; then
+    import::git https://github.com/jbeder/yaml-cpp | install::cmake
+fi

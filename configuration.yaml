@@ -1,0 +1,80 @@
+- name: ptgrey.0
+  fps: 1
+  type: rgb
+  resolution:
+    width: 728
+    height: 1288
+  brightness: 1.367188  #  [1.367~7.422]
+  exposure:
+    mode: true
+    value: 0.9849243  #  [-7.585~2.414] (0.858)
+  shutter:
+    mode: false
+    percent: 6.400974
+  gain:
+    mode: true
+    percent: 0
+  white_balance:
+    mode: true
+    red: 733  #  0~1023
+    blue: 699  #  0~1023
+- name: ptgrey.1
+  fps: 1
+  type: rgb
+  resolution:
+    width: 728
+    height: 1288
+  brightness: 2.929688  #  [1.367~7.422]
+  exposure:
+    mode: true
+    value: 0.7901001  #  [-7.585~2.414] (0.858)
+  shutter:
+    mode: true
+    percent: 36.45484
+  gain:
+    mode: true
+    percent: 8.422939
+  white_balance:
+    mode: true
+    red: 741  #  0~1023
+    blue: 688  #  0~1023
+- name: ptgrey.2
+  fps: 1
+  type: rgb
+  resolution:
+    width: 728
+    height: 1288
+  brightness: 1.367188  #  [1.367~7.422]
+  exposure:
+    mode: true
+    value: 0.8908081  #  [-7.585~2.414] (0.858)
+  shutter:
+    mode: true
+    percent: 1.46842
+  gain:
+    mode: false
+    percent: 41.75628
+  white_balance:
+    mode: true
+    red: 703  #  0~1023
+    blue: 700  #  0~1023
+- name: ptgrey.3
+  fps: 10
+  type: rgb
+  resolution:
+    width: 728
+    height: 1288
+  brightness: 2.734375  #  [1.367~7.422]
+  exposure:
+    mode: true
+    value: 0.8579712  #  [-7.585~2.414] (0.858)
+  shutter:
+    mode: false
+    percent: 24.9821
+  gain:
+    mode: true
+    percent: 87.99284
+  white_balance:
+    mode: true
+    red: 664  #  0~1023
+    blue: 763  #  0~1023
