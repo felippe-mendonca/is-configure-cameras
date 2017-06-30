@@ -1,5 +1,4 @@
 #include "slider-configure.hpp"
-#include "yaml-configure.hpp"
 #include <algorithm>
 #include <atomic>
 #include <boost/iterator/zip_iterator.hpp>
@@ -19,6 +18,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include "yaml-configure.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -112,6 +112,7 @@ int main(int argc, char* argv[]) {
   std::map<std::string, std::shared_ptr<slider>> sliders;
   std::map<std::string, std::shared_ptr<checkbox>> cboxes;
   std::atomic<std::size_t> camera;
+  std::atomic<bool> update_all{false};
   camera.store(0);
 
   y = Y0;
@@ -123,6 +124,7 @@ int main(int argc, char* argv[]) {
 
   cameras_list.events().selected([&](auto) {
     camera.store(cameras_list.option());
+    update_all.store(true);
     is::log::info("Selected camera {}", cameras.at(cameras_list.option()));
   });
 
@@ -139,11 +141,6 @@ int main(int argc, char* argv[]) {
       is::log::info("[{}|{}|manual|{}]", cameras.at(camera.load()), property, sl->value());
       request_configuration(client, cameras.at(camera.load()),
                             value_to_property.at(property)(sl->value(), 1000, false));
-
-      // auto mode = has_mode.at(property) ? cboxes.at(property)->checked() : true;
-      // is::log::info("[{}|{}|{}|{}]", cameras.at(camera.load()), property, mode ? "auto" : "manual", sl->value());
-      // request_configuration(client, cameras.at(camera.load()), value_to_property.at(property)(sl->value(), 1000,
-      // mode));
     });
     sl->vernier([&](unsigned int maximum, unsigned int cursor_value) {
       auto percentage = static_cast<double>(cursor_value) / static_cast<double>(maximum);
@@ -217,7 +214,8 @@ int main(int argc, char* argv[]) {
     auto client = is::make_client(is);
     while (running) {
       auto start = std::chrono::high_resolution_clock::now();
-      update_values(client, cameras.at(camera.load()), sliders, cboxes);
+      update_values(client, cameras.at(camera.load()), sliders, cboxes, !update_all.load());
+      update_all.store(false);
       std::this_thread::sleep_until(start + 1s);
     }
   });

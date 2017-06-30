@@ -118,14 +118,14 @@ const std::map<std::string, std::function<unsigned int(Configuration, unsigned i
        auto pmin = properties.at("Brightness").first;
        auto pmax = properties.at("Brightness").second;
        auto value = *(c.brightness);
-       return static_cast<unsigned int>(max * (value / (pmax - pmin)));
+       return static_cast<unsigned int>(max * ((value - pmin) / (pmax - pmin)));
      }},
     {"Exposure",
      [&](Configuration c, unsigned int max) {
        auto pmin = properties.at("Exposure").first;
        auto pmax = properties.at("Exposure").second;
        auto value = (*(c.exposure)).value;
-       return static_cast<unsigned int>(max * (value / (pmax - pmin)));
+       return static_cast<unsigned int>(max * ((value - pmin) / (pmax - pmin)));
      }},
     {"Shutter",
      [&](Configuration c, unsigned int max) {
@@ -133,7 +133,7 @@ const std::map<std::string, std::function<unsigned int(Configuration, unsigned i
        auto pmax = properties.at("Shutter").second;
        auto shutter = *(c.shutter);
        auto value = *(shutter.percent);
-       return static_cast<unsigned int>(max * (value / (pmax - pmin)));
+       return static_cast<unsigned int>(max * ((value - pmin) / (pmax - pmin)));
      }},
     {"Gain",
      [&](Configuration c, unsigned int max) {
@@ -141,7 +141,7 @@ const std::map<std::string, std::function<unsigned int(Configuration, unsigned i
        auto pmax = properties.at("Gain").second;
        auto gain = *(c.gain);
        auto value = *(gain.percent);
-       return static_cast<unsigned int>(max * (value / (pmax - pmin)));
+       return static_cast<unsigned int>(max * ((value - pmin) / (pmax - pmin)));
      }},
     {"WB[red]",
      [&](Configuration c, unsigned int max) {
@@ -149,7 +149,7 @@ const std::map<std::string, std::function<unsigned int(Configuration, unsigned i
        auto pmax = properties.at("WB[red]").second;
        auto white_balance = *(c.white_balance);
        auto value = *(white_balance.red);
-       return static_cast<unsigned int>(max * (value / (pmax - pmin)));
+       return static_cast<unsigned int>(max * ((value - pmin) / (pmax - pmin)));
      }},
     {"WB[blue]",
      [&](Configuration c, unsigned int max) {
@@ -157,7 +157,7 @@ const std::map<std::string, std::function<unsigned int(Configuration, unsigned i
        auto pmax = properties.at("WB[blue]").second;
        auto white_balance = *(c.white_balance);
        auto value = *(white_balance.blue);
-       return static_cast<unsigned int>(max * (value / (pmax - pmin)));
+       return static_cast<unsigned int>(max * ((value - pmin) / (pmax - pmin)));
      }},
 };
 
@@ -197,7 +197,7 @@ void request_configuration(is::ServiceClient client, std::string const& camera, 
 
 void update_values(is::ServiceClient client, std::string const& camera,
                    std::map<std::string, std::shared_ptr<slider>>& sliders,
-                   std::map<std::string, std::shared_ptr<checkbox>>& cboxes){//, bool just_auto = false) {
+                   std::map<std::string, std::shared_ptr<checkbox>>& cboxes, bool just_auto = false) {
   auto id = client.request(camera + ".get_configuration", is::msgpack(0));
   auto config_msg = client.receive_for(1s, id, is::policy::discard_others);
 
@@ -209,8 +209,8 @@ void update_values(is::ServiceClient client, std::string const& camera,
     auto property = s.first;
     auto slider = s.second;
     auto mode = property_mode.at(property)(configuration);
-    // if (just_auto && !mode)
-    //   continue;
+    if (just_auto && !mode)
+      continue;
     slider->value(property_to_value.at(property)(configuration, 1000));
     if (has_mode.at(property))
       cboxes.at(property)->check(mode);
