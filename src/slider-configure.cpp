@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
       configurations.emplace(camera, configuration);
     });
 
-    is::log::info("Saving parameters on configuration.yaml");
+    is::log::info("Saving parameters on {}", yaml_file);
     is::camera::configuration::from_configurations(configurations, yaml_file);
   });
 
