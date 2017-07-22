@@ -17,6 +17,8 @@ using namespace is::msg::common;
 using namespace is::msg::camera;
 using namespace YAML;
 
+auto mode = [](bool const& mode){ return mode ? "auto" : "manual"; };
+
 void from_configurations(std::map<std::string, Configuration> configurations, std::string const& filename) {
   Emitter out;
   out << BeginSeq;
@@ -40,25 +42,25 @@ void from_configurations(std::map<std::string, Configuration> configurations, st
     out << Key << "exposure";
       out << BeginMap;
       auto exposure = *(config.exposure);
-      out << Key << "mode" << Value << *(exposure.auto_mode);
+      out << Key << "mode" << Value << mode(*(exposure.auto_mode));
       out << Key << "value" << Value << exposure.value << Comment(" [-7.585~2.414] (0.858)");
       out << EndMap;
     out << Key << "shutter";
       out << BeginMap;
       auto shutter = *(config.shutter);
-      out << Key << "mode" << Value << *(shutter.auto_mode);
+      out << Key << "mode" << Value << mode(*(shutter.auto_mode));
       out << Key << "percent" << Value << *(shutter.percent);
       out << EndMap;
     out << Key << "gain";
       out << BeginMap;
       auto gain = *(config.gain);
-      out << Key << "mode" << Value << *(gain.auto_mode);
+      out << Key << "mode" << Value << mode(*(gain.auto_mode));
       out << Key << "percent" << Value << *(gain.percent);
       out << EndMap;
     out << Key << "white_balance";
       out << BeginMap;
       auto white_balance = *(config.white_balance);
-      out << Key << "mode" << Value << *(white_balance.auto_mode);
+      out << Key << "mode" << Value << mode(*(white_balance.auto_mode));
       out << Key << "red" << Value << *(white_balance.red) << Comment(" 0~1023");
       out << Key << "blue" << Value << *(white_balance.blue) << Comment(" 0~1023");
       out << EndMap;
