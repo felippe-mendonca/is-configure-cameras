@@ -184,26 +184,35 @@ int main(int argc, char* argv[]) {
   save_bt.caption("Save");
   save_bt.events().mouse_up([&]() {
     std::vector<std::string> ids;
+    std::vector<std::pair<std::string, std::string>> ids_cameras;
     for (auto& camera : cameras) {
       ids.push_back(client.request(camera + ".get_configuration", is::msgpack(0)));
+      ids_cameras.push_back(std::make_pair(ids.back(), camera));
     }
     auto configuration_msgs = client.receive_until(high_resolution_clock::now() + 2s, ids, is::policy::discard_others);
     if (configuration_msgs.size() != cameras.size()) {
       is::log::warn("Failed on requesting cameras parameters. Try again.");
       return;
     }
-    auto config_iterator_begin =
-        boost::make_zip_iterator(boost::make_tuple(configuration_msgs.begin(), cameras.begin()));
-    auto config_iterator_end = boost::make_zip_iterator(boost::make_tuple(configuration_msgs.end(), cameras.end()));
+    // huehue eu sou um mapa aew!
     std::map<std::string, Configuration> configurations;
-    std::for_each(config_iterator_begin, config_iterator_end, [&](auto config) {
-      auto configuration = is::msgpack<Configuration>(boost::get<0>(config).second);
-      auto camera = boost::get<1>(config);
-      configurations.emplace(camera, configuration);
+    std::for_each(ids_cameras.begin(), ids_cameras.end(), [&](auto id_camera) {
+      auto id = id_camera.first;
+      auto camera = id_camera.second;
+      try {
+        auto msg = configuration_msgs.at(id);
+        auto configuration = is::msgpack<Configuration>(msg);
+        is::log::info("Writing {} configuration", camera);
+        configurations.emplace(camera, configuration);
+      } catch (std::out_of_range&) {
+        is::log::warn("Reply not receive from {}", camera);
+      }
     });
 
-    is::log::info("Saving parameters on {}", yaml_file);
-    is::camera::configuration::from_configurations(configurations, yaml_file);
+    if (!configurations.empty()) {
+      is::log::info("Saving parameters on {}", yaml_file);
+      is::camera::configuration::from_configurations(configurations, yaml_file);
+    }
   });
 
   fm.show();
